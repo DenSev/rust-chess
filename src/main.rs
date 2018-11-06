@@ -3,16 +3,18 @@ extern crate rust_chess;
 use rust_chess::Cell;
 use rust_chess::Color;
 use rust_chess::Piece;
+use rust_chess::Board;
+use rust_chess::PieceKind;
 
 fn main() {
-    let cell = Cell::some(Piece::KING(Color::BLACK, String::from("king")));
-    let black_king = cell.get_representation();
+    let mut board = Board::new();
 
-    let piece = Piece::KING(Color::BLACK, String::from("king"));
-    if let Piece::KING(_color, repr) = piece {
-        repr;
-    };
+    let expected_piece = Cell::some(Piece { piece_kind: PieceKind::Rook, color: Color::White, representation: "♖" });
 
+    board.set_cell_at(expected_piece, 7, 0);
 
-    println!("Hello, world! {} ", black_king);
+    let actual_piece = board.cell_at(7, 0);
+
+    println!("{:?}", expected_piece)
+
 }

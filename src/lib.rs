@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::option::Option;
 
 const BOARD_SIZE: usize = 8;
@@ -51,6 +52,14 @@ impl Cell {
             Cell::Some(piece) => Some(&piece)
         };
     }
+
+    pub fn get_piece_kind(&self) -> Option<&PieceKind> {
+        return match &self {
+            Cell::None => None,
+            Cell::Some(piece) => Some(&piece.piece_kind)
+        };
+    }
+
 
     pub fn is_opposing(&self, cell: &Cell) -> bool {
         return match &self {
@@ -234,8 +243,92 @@ impl Board {
     pub fn cell_at(&self, x: usize, y: usize) -> &Cell {
         return &self.cells[y][x];
     }
+
+    pub fn get_cells_of_color(&self, color: Color) -> HashMap<Pos, &Cell> {
+        let mut pieces: HashMap<Pos, &Cell> = HashMap::new();
+
+        for i in 0..BOARD_SIZE {
+            for j in 0..BOARD_SIZE {
+                let cell_at = self.cell_at(i, j);
+
+                if color.eq(cell_at.get_color().unwrap()) {
+                    pieces.insert(Pos { x: j, y: i }, cell_at);
+                }
+            }
+        }
+        return pieces;
+    }
+
+    pub fn get_pos_of_piece(&self, piece: PieceKind, color: Color) -> Option<Pos> {
+        for i in 0..BOARD_SIZE {
+            for j in 0..BOARD_SIZE {
+                let cell_at = self.cell_at(i, j);
+                if color.eq(cell_at.get_color().unwrap())
+                    && piece.eq(cell_at.get_piece_kind().unwrap()) {
+                    return Some(Pos { x: j, y: i });
+                }
+            }
+        }
+        return None;
+    }
+
+    pub fn check_for_pieces(&self, pieces: HashMap<Pos, &Cell>, opposing_king_pos: Pos) -> bool {
+        for (pos, piece) in pieces.iter() {
+
+            let positions = Vec::new();//Game.INSTANCE.getPieceMovement(piece).getAvailableMovePositions(pieceAtPosition.getKey());
+            if positions.contains(opposing_king_pos) {
+                return true;
+            }
+        }
+        return false;
+        /* private boolean checkForPieces(Map<Position, Cell> pieces, Position opposingKingPosition) {
+        for (Map.Entry<Position, Cell> pieceAtPosition : pieces.entrySet()) {
+            Piece piece = pieceAtPosition.getValue().getPiece();
+            List<Position> positions = Game.INSTANCE.getPieceMovement(piece)
+                .getAvailableMovePositions(pieceAtPosition.getKey());
+
+            if (positions.contains(opposingKingPosition)) {
+                return true;
+            }
+        }
+        return false;
+        } */
+    }
+
+    pub fn check_board(&self) -> Option<Color> {
+        let white_pieces = self.get_cells_of_color(Color::White);
+        let black_king = self.get_pos_of_piece(PieceKind::King, Color::Black);
+        let black_king_checked = self.check_for_pieces(white_pieces, black_king.unwrap());
+
+
+        /*
+    public Color checkBoard() {
+        final Map<Position, Cell> whitePieces = getCellsOfColor(WHITE);
+        final Position blackKingPosition = getPositionOfPiece(KING, BLACK);
+        final boolean blackKingChecked = checkForPieces(whitePieces, blackKingPosition);
+
+        if (blackKingChecked) {
+            return Color.BLACK;
+        }
+
+        final Map<Position, Cell> blackPieces = getCellsOfColor(BLACK);
+        final Position whiteKingPosition = getPositionOfPiece(KING, WHITE);
+        final boolean whiteKingChecked = checkForPieces(blackPieces, whiteKingPosition);
+
+        if (whiteKingChecked) {
+            return Color.WHITE;
+        }
+
+        return null;
+    }*/
+    }
 }
 
+#[derive(Eq, PartialEq)]
+pub struct Pos {
+    x: usize,
+    y: usize,
+}
 
 #[cfg(test)]
 mod test {
